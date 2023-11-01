@@ -43,7 +43,10 @@ def try_tc(training, test):
     ntest = len(test)
 
     # Score test instances.
-    correct = 0
+    tp = 0
+    fp = 0
+    tn = 0
+    fn = 0
     for inst in test:
         ordering = list(training)
         ordering = sorted(
@@ -55,9 +58,19 @@ def try_tc(training, test):
         guess = nspam > k / 2
         if TRACE:
             print(inst.name, inst.label, guess)
-        correct += int(inst.label == guess)
+        if inst.label == 1 and guess == 1:
+            tp += 1
+        elif inst.label == 1 and guess == 0:
+            fp += 1
+        elif inst.label == 0 and guess == 1:
+            fn += 1
+        elif inst.label == 0 and guess == 0:
+            tn += 1
+        else:
+            assert False
 
-    return correct / ntest
+    # Return accuracy, precision, recall
+    return ((tp + tn) / ntest, tp / (tp + fp), tp / (tp + fn))
 
 # Number of instances per split.
 nsplit = math.ceil(ninstances / nsplits)
